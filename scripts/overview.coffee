@@ -17,6 +17,7 @@ class OverviewTab extends ReportTab
     totals = @recordSet('CumulativeImpacts', 'CI_Totals').toArray()
 
     stressors = @recordSet('CumulativeImpacts', 'CumulativeImpact').toArray()
+    
     for s in stressors
       s.IMP = Number(s.IMP).toFixed(2)
       if s.PERC_MOD != '100'
