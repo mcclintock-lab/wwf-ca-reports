@@ -17,13 +17,14 @@ class OverviewTab extends ReportTab
     totals = @recordSet('CumulativeImpacts', 'CI_Totals').toArray()
 
     stressors = @recordSet('CumulativeImpacts', 'CumulativeImpact').toArray()
-    
+    hasModified = false
     for s in stressors
       s.IMP = Number(s.IMP).toFixed(2)
       if s.PERC_MOD != '100'
         s.MOD_VAL_DOWN = 1/s.PERC_MOD
         s.MOD_VAL_UP = -1*s.PERC_MOD
         s.IS_MOD = true
+        hasModified = true
       else
         s.MOD_VAL_DOWN = -1*s.PERC_MOD
         s.MOD_VAL_UP = s.PERC_MOD
@@ -32,8 +33,12 @@ class OverviewTab extends ReportTab
       s.PERC_MOD = Number(s.PERC_MOD).toFixed(0)
       s.PERC_TOT = Number(s.PERC_TOT).toFixed(1)
 
+    console.log("has modified? ", hasModified)
+    if !hasModified
+      console.log('trying to filter modified now')
 
-
+      totals = _.filter totals, (r) -> r.VERSION != 'Modified Scores'
+    console.log("totals: ", totals)
     # setup context object with data and render the template from it
     context =
       sketch: @model.forTemplate()
@@ -43,12 +48,14 @@ class OverviewTab extends ReportTab
       d3IsPresent: d3IsPresent
       totals: totals
       stressors: stressors
+      hasModified: hasModified
 
     @$el.html @template.render(context, templates)
 
 
     #make sure this comes before paging, otherwise pages won't be there  
     @setupStressorSorting(stressors)
+    @enableTablePaging()
 
   setupStressorSorting: (pdata) =>
     tbodyName = '.stressor_values'
@@ -132,7 +139,7 @@ class OverviewTab extends ReportTab
     
     #fire the event for the active page if pagination is present
     #no pagination yet for this project
-    #@firePagination(tableName)
+    @firePagination(tableName)
     if event
       event.stopPropagation()
 
@@ -180,4 +187,11 @@ class OverviewTab extends ReportTab
 
     return targetColumn
 
+  firePagination: (tableName) =>
+    el = @$(tableName)[0]
+    hab_table = d3.select(el)
+    active_page = hab_table.selectAll(".active a")
+    if active_page and active_page[0] and active_page[0][0]
+      if active_page[0][0]
+        active_page[0][0].click()
 module.exports = OverviewTab

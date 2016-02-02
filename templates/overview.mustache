@@ -1,33 +1,64 @@
 <div class="reportSection tableContainer">
-  <h4>Total Cumulative Effects</h4>
-  <table>
-    <thead>
-      <tr>
-        <th></th>
-        <th>Mean</th>
-        <th>Standard Deviation</th>
-        <th>Minimum</th>
-        <th>Maximum</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#totals}}
-      <tr>
-        <td>{{VERSION}}</td>
-        <td>{{MEAN}}</td>
-        <td>{{STDEV}}</td>
-        <td>{{MIN}}</td>
-        <td>{{MAX}}</td>
-      </tr>
-      {{/totals}}
-    </tbody>
-  </table>
-</div>
+  {{#hasModified}}
+    <h4>Total Cumulative Effects</h4>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Mean</th>
+          <th>Standard Deviation</th>
+          <th>Minimum</th>
+          <th>Maximum</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#totals}}
+        <tr>
+          <td>{{VERSION}}</td>
+          <td>{{MEAN}}</td>
+          <td>{{STDEV}}</td>
+          <td>{{MIN}}</td>
+          <td>{{MAX}}</td>
+        </tr>
+        {{/totals}}
+      </tbody>
+    </table>
+  </div>
+{{/hasModified}}
+{{^hasModified}}
+    <h4>Total Cumulative Effects</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Mean</th>
+          <th>Standard Deviation</th>
+          <th>Minimum</th>
+          <th>Maximum</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#totals}}
+        <tr>
+          <td>{{MEAN}}</td>
+          <td>{{STDEV}}</td>
+          <td>{{MIN}}</td>
+          <td>{{MAX}}</td>
+        </tr>
+        {{/totals}}
+      </tbody>
+    </table>
+    <tfoot>
+      <tr colspan="4">
+        <td><div style="width:100%;text-align:center;margin-top:5px;"><i>Note: no stressors were changed from the default values</i></div></td>
+      </tr> 
+    </tfoot>
+  </div>
+{{/hasModified}}
 
 <div class="reportSection tableContainer">
   <h4>Cumulative Effects For Each Stressor</h4>
   {{#d3IsPresent}}
-    <table class="stressor_table">
+    <table data-paging="10" class="stressor_table">
       <thead>
         <tr>
           <th style="width:60%;"><a class="stressor_name sort_down" href="#">Stressor Name</a></th>
@@ -41,7 +72,7 @@
   {{/d3IsPresent}}
 
   {{^d3IsPresent}}
-    <table>
+    <table data-paging="10">
       <thead>
         <tr>
           <th>Stressor Name</th>
