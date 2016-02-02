@@ -1,5 +1,5 @@
 <div class="reportSection tableContainer">
-  <h4>Cumulative Impact</h4>
+  <h4>Total Cumulative Effects</h4>
   <table>
     <thead>
       <tr>
@@ -10,17 +10,52 @@
       </tr>
     </thead>
     <tbody>
-      {{#cumulativeImpact}}
+      {{#totals}}
       <tr>
         <td style="text-align:center;">{{MEAN}}</td>
         <td>{{STDEV}}</td>
         <td>{{MIN}}</td>
         <td>{{MAX}}</td>
       </tr>
-      {{/cumulativeImpact}}
-
+      {{/totals}}
     </tbody>
   </table>
+</div>
 
+<div class="reportSection tableContainer">
+  <h4>Cumulative Effects For Each Stressor</h4>
+  {{#d3IsPresent}}
+    <table class="stressor_table">
+      <thead>
+        <tr>
+          <th style="width:60%;"><a class="stressor_name sort_down" href="#">Stressor Name</a></th>
+          <th class="sorting_col"><a class="stressor_perc_adj sort_up" href="#">% Adjustment (100% is unmodified)</a></th>
+          <th><a class="stressor_perc_tot sort_down" href="#">% of Total Impact</a></th>
+        </tr>
+      </thead>
+      <tbody class="stressor_values"></tbody>
+    </table>
+  {{/d3IsPresent}}
 
+  {{^d3IsPresent}}
+    <table>
+      <thead>
+        <tr>
+          <th>Stressor Name</th>
+          <th>Impact</th>
+          <th>% Adjustment</th>
+          <th>% of Total Impact</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#stressors}}
+        <tr>
+          <td style="text-align:center;">{{NAME}}</td>
+          <td>{{PERC_MOD}}</td>
+          <td>{{PERC_TOT}}</td>
+        </tr>
+        {{/stressors}}
+      </tbody>
+    </table>
+  {{/d3IsPresent}}
 </div>

@@ -368,3 +368,14 @@
   stroke: #000;
   shape-rendering: crispEdges;
 }
+.sorting_col {
+  background-color: #eee;
+  font-style: bold;
+  text-decoration: underline;
+}
+.is_mod {
+  background-color: #ADD8E6;
+}
+.not_mod {
+  background-color: white;
+}
