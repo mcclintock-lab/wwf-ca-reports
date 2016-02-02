@@ -1,0 +1,26 @@
+<div class="reportSection tableContainer">
+  <h4>Cumulative Impact</h4>
+  <table>
+    <thead>
+      <tr>
+        <th>Mean</th>
+        <th>Standard Deviation</th>
+        <th>Minimum</th>
+        <th>Maximum</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#cumulativeImpact}}
+      <tr>
+        <td style="text-align:center;">{{MEAN}}</td>
+        <td>{{STDEV}}</td>
+        <td>{{MIN}}</td>
+        <td>{{MAX}}</td>
+      </tr>
+      {{/cumulativeImpact}}
+
+    </tbody>
+  </table>
+
+
+</div>
