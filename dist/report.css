@@ -374,8 +374,10 @@
   text-decoration: underline;
 }
 .is_mod {
-  background-color: #ADD8E6;
+  background-color: #CFDBC5;
+  font-style: italic;
 }
 .not_mod {
   background-color: white;
+  font-style: normal;
 }
