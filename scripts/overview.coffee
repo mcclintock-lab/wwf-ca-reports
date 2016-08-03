@@ -8,7 +8,10 @@ class OverviewTab extends ReportTab
   className: 'overview'
   timeout: 120000
   template: templates.overview
-  dependencies: ['CumulativeImpacts']
+  dependencies: [
+    'CumulativeImpacts'
+    'CumulativeImpactsPerHabitat'
+  ]
 
   render: () ->
     d3IsPresent = window.d3
@@ -16,10 +19,21 @@ class OverviewTab extends ReportTab
     isCollection = @model.isCollection()
     totals = @recordSet('CumulativeImpacts', 'CI_Totals').toArray()
 
-    stressors = @recordSet('CumulativeImpacts', 'CumulativeImpact').toArray()
     hasModified = false
+
+    stressors_per_habitat = @recordSet('CumulativeImpactsPerHabitat', 'CumulativeImpact').toArray()
+
+    habitatsForStressors = [{VAL:"all", DISPLAY:"All Habitats", sel:'selected'}, {VAL:"bh", DISPLAY:"Benthic Habitats", sel:''},
+                            {VAL:"dp", DISPLAY:"Deep Pelagic", sel:''},{VAL:"eg", DISPLAY:"Eelgrass",sel:''},
+                            {VAL:"kp", DISPLAY:"Kelp", sel:''}, {VAL:"sp", DISPLAY:"Shallow Pelagic",sel:''},
+                            {VAL:"sr", DISPLAY:"Sponge Reef",sel:''}]
+
+
+    stressors = _.filter stressors_per_habitat, (r) -> r.SC_ID == 'all'
+
     for s in stressors
-      s.IMP = Number(s.IMP).toFixed(2)
+      s.CUM_IMPACT = Number(s.CUM_IMPACT).toFixed(2)
+
       if s.PERC_MOD != '100'
         s.MOD_VAL_DOWN = 1/s.PERC_MOD
         s.MOD_VAL_UP = -1*s.PERC_MOD
@@ -33,12 +47,10 @@ class OverviewTab extends ReportTab
       s.PERC_MOD = Number(s.PERC_MOD).toFixed(0)
       s.PERC_TOT = Number(s.PERC_TOT).toFixed(1)
 
-    console.log("has modified? ", hasModified)
-    if !hasModified
-      console.log('trying to filter modified now')
 
+    if !hasModified
       totals = _.filter totals, (r) -> r.VERSION != 'Modified Scores'
-    console.log("totals: ", totals)
+
     # setup context object with data and render the template from it
     context =
       sketch: @model.forTemplate()
@@ -49,18 +61,47 @@ class OverviewTab extends ReportTab
       totals: totals
       stressors: stressors
       hasModified: hasModified
+      habitatsForStressors: habitatsForStressors
 
     @$el.html @template.render(context, templates)
 
 
     #make sure this comes before paging, otherwise pages won't be there  
+    
+    
+    @$('.chosen-habs').chosen({disable_search_threshold: 10})
+    @$('.chosen-habs').change () =>
+      _.defer @renderStressorsPerHabitat(stressors_per_habitat)
+    @$('.show_nonzero').change () =>
+      _.defer @doShowNonzeroClick(stressors_per_habitat)
+    
     @setupStressorSorting(stressors)
-    @enableTablePaging()
+    #@enableTablePaging()
+
+  renderStressorsPerHabitat: (stressors_per_habitat) => 
+    #habitats = ['all', 'bh', 'dp', 'eg', 'kp', 'sp', 'sr']
+    name = @$('.chosen-habs').val()
+    stressors = _.filter stressors_per_habitat, (r) -> r.SC_ID == name
+
+    tbodyName = '.stressor_values'
+    tableName = '.stressor_table'
+    stressorFunction = ["NAME", "PERC_MOD", "PERC_TOT"]
+    @renderSort('NAME', tableName, stressors, undefined, "NAME", tbodyName, false, stressorFunction, true)
+
+  doShowNonzeroClick: (stressors_per_habitat) =>
+    name = @$('.chosen-habs').val()
+    stressors = _.filter stressors_per_habitat, (r) -> r.SC_ID == name
+
+    tbodyName = '.stressor_values'
+    tableName = '.stressor_table'
+    stressorFunction = ["NAME", "PERC_MOD", "PERC_TOT"]
+    @renderSort('NAME', tableName, stressors, undefined, "NAME", tbodyName, false, stressorFunction, true)
 
   setupStressorSorting: (pdata) =>
     tbodyName = '.stressor_values'
     tableName = '.stressor_table'
     stressorFunction = ["NAME", "PERC_MOD", "PERC_TOT"]
+    
     @$('.stressor_name').click (event) =>
       @renderSort('stressor_name', tableName, pdata, event, "NAME", tbodyName, false, stressorFunction)
 
@@ -76,30 +117,29 @@ class OverviewTab extends ReportTab
     @renderSort('PERC_MOD', tableName, pdata, undefined, "PERC_MOD", tbodyName, true, stressorFunction)
     
   #do the sorting - should be table independent
-  renderSort: (name, tableName, pdata, event, sortBy, tbodyName, isFloat, getRowStringValue) =>
+  renderSort: (name, tableName, pdata, event, sortBy, tbodyName, isFloat, getRowStringValue, reallySortUp) =>
     if event
       event.preventDefault()
 
     targetColumn = @getSelectedColumn(event, name)
 
     sortUp = @getSortDir(targetColumn)
-
     
     data = _.sortBy pdata, (row) -> row['NAME']
+    show_nonzero = @$('.show_nonzero')[0].checked
+    if show_nonzero
+      data = _.filter data, (row) -> row.PERC_TOT > 0.0
       #flip sorting if needed
-    if sortUp
-        data.reverse()
+    if sortUp || reallySortUp
+      data.reverse()
 
     if sortBy == 'PERC_MOD'
-    #flip sorting if needed
+      #flip sorting if needed
       data.reverse()
       if sortUp
         data = _.sortBy(data, 'MOD_VAL_UP')
       else
         data = _.sortBy(data, 'MOD_VAL_DOWN')
-
-
-
     else if sortBy != 'NAME'
       data = _.sortBy data, (row) ->  parseFloat(row[sortBy])
       #flip sorting if needed
@@ -112,29 +152,29 @@ class OverviewTab extends ReportTab
     hab_body.selectAll("tr.stressor_rows")
       .remove()
 
-    #add new rows (and data)
-    #.html((d) -> getRowStringValue(d))
-    
-    rows = hab_body.selectAll("tr")
-      .data(data)
-    .enter().insert("tr", ":first-child")
-    .attr("class", (d) -> 
-      if d.IS_MOD
-        return "stressor_rows is_mod" 
-      else
-        return "stressor_rows not_mod"
-      )
+    if data?.length > 0
+      @$('.no-stressor-results').hide()
+      rows = hab_body.selectAll("tr")
+        .data(data)
+      .enter().insert("tr", ":first-child")
+      .attr("class", (d) -> 
+        if d.IS_MOD
+          return "stressor_rows is_mod" 
+        else
+          return "stressor_rows not_mod"
+        )
 
-    columns = getRowStringValue
-    cells = rows.selectAll("td")
-        .data((row, i) ->columns.map (column) -> (column: column, value: row[column]))
-      .enter()
-      .append("td").text((d, i) -> 
-        d.value
-      )    
+      columns = getRowStringValue
+      cells = rows.selectAll("td")
+          .data((row, i) ->columns.map (column) -> (column: column, value: row[column]))
+        .enter()
+        .append("td").text((d, i) -> 
+          d.value
+        )    
+    else
+      @$('.no-stressor-results').show()
 
     @setNewSortDir(targetColumn, sortUp)
-
     @setSortingColor(event, tableName)
     
     #fire the event for the active page if pagination is present

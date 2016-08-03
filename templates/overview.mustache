@@ -57,39 +57,33 @@
 
 <div class="reportSection tableContainer">
   <h4>Cumulative Effects For Each Stressor</h4>
+    <p>
+      <span>Show Stressor Scores for Habitats:</span>
+      <span><select class="chosen-habs">
+        {{#habitatsForStressors}}
+          <option {{sel}} value="{{VAL}}">{{DISPLAY}}</option>
+        {{/habitatsForStressors}}
+      </select>
+      </span>
+    </p>
+
   {{#d3IsPresent}}
-    <table data-paging="10" class="stressor_table">
-      <thead>
-        <tr>
-          <th style="width:60%;"><a class="stressor_name sort_down" href="#">Stressor Name</a></th>
-          <th class="sorting_col"><a class="stressor_perc_adj sort_up" href="#">% Adjustment (100 is unmodified)</a></th>
-          <th><a class="stressor_perc_tot sort_down" href="#">% of Total Impact</a></th>
-        </tr>
-
-      </thead>
-      <tbody class="stressor_values"></tbody>
-    </table>
+    
+      <table class="stressor_table">
+        <thead>
+          <tr>
+            <th style="width:60%;"><a class="stressor_name sort_down" href="#">Stressor Name</a></th>
+            <th class="sorting_col"><a class="stressor_perc_adj sort_up" href="#">% Adjustment (100 is unmodified)</a></th>
+            <th><a class="stressor_perc_tot sort_down" href="#">% of Total Impact</a></th>
+          </tr>
+        </thead>
+        <tbody class="stressor_values"></tbody>
+      </table>
+      <div class='no-stressor-results'>There are no stressors with cumulative impacts &gt; 0</div>
+      <div class="show-nonzero-checkbox">
+      <input class="show_nonzero" checked type="checkbox" name="show_nonzero" value="show_nonzero">
+        <span>Only show stressors with cumulative impacts &gt; 0</span>
+      </div>
   {{/d3IsPresent}}
 
-  {{^d3IsPresent}}
-    <table data-paging="10">
-      <thead>
-        <tr>
-          <th>Stressor Name</th>
-          <th>Impact</th>
-          <th>% Adjustment</th>
-          <th>% of Total Impact</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#stressors}}
-        <tr>
-          <td style="text-align:center;">{{NAME}}</td>
-          <td>{{PERC_MOD}}</td>
-          <td>{{PERC_TOT}}</td>
-        </tr>
-        {{/stressors}}
-      </tbody>
-    </table>
-  {{/d3IsPresent}}
 </div>

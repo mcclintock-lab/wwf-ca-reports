@@ -381,3 +381,24 @@
   background-color: white;
   font-style: normal;
 }
+.chosen-habs {
+  width: 50%;
+  margin-left: 15px;
+}
+.show-nonzero-checkbox {
+  padding: 10px 5px 5px 5px;
+}
+.show-nonzero-checkbox > span {
+  padding-left: 5px;
+  vertical-align: middle;
+  margin-top: 10px;
+  font-size: 1.2em;
+  font-style: bold;
+}
+.no-stressor-results {
+  font-style: italic;
+  text-align: center;
+  display: none;
+  width: 100%;
+  padding-top: 5px;
+}
