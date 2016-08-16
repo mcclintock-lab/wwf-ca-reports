@@ -30,10 +30,18 @@ class OverviewTab extends ReportTab
 
 
     stressors = _.filter stressors_per_habitat, (r) -> r.SC_ID == 'all'
+    ci_totals = {NAME:"Total", PERC_TOT:100.0, PERC_MOD:'--',CUM_IMPACT:0.0}
 
     for s in stressors
       s.CUM_IMPACT = Number(s.CUM_IMPACT).toFixed(2)
-
+      try
+        if !isNaN(s.CUM_IMPACT)
+          ci_totals.CUM_IMPACT = Number(ci_totals.CUM_IMPACT) + Number(s.CUM_IMPACT)
+      
+      catch e
+        #skip any non-numbers
+      
+      
       if s.PERC_MOD != '100'
         s.MOD_VAL_DOWN = 1/s.PERC_MOD
         s.MOD_VAL_UP = -1*s.PERC_MOD
@@ -47,6 +55,7 @@ class OverviewTab extends ReportTab
       s.PERC_MOD = Number(s.PERC_MOD).toFixed(0)
       s.PERC_TOT = Number(s.PERC_TOT).toFixed(1)
 
+    #stressors.push(ci_totals)
 
     if !hasModified
       totals = _.filter totals, (r) -> r.VERSION != 'Modified Scores'
@@ -94,7 +103,7 @@ class OverviewTab extends ReportTab
 
     tbodyName = '.stressor_values'
     tableName = '.stressor_table'
-    stressorFunction = ["NAME", "PERC_MOD", "PERC_TOT"]
+    stressorFunction = ["NAME","PERC_MOD", "PERC_TOT"]
     @renderSort('NAME', tableName, stressors, undefined, "NAME", tbodyName, false, stressorFunction, true)
 
   setupStressorSorting: (pdata) =>
@@ -106,7 +115,7 @@ class OverviewTab extends ReportTab
       @renderSort('stressor_name', tableName, pdata, event, "NAME", tbodyName, false, stressorFunction)
 
     #@$('.stressor_imp').click (event) =>
-    #  @renderSort('stressor_imp',tableName, pdata, event, "IMP", tbodyName, true, stressorFunction)
+    #  @renderSort('stressor_score',tableName, pdata, event, "CUM_IMPACT", tbodyName, true, stressorFunction)
 
     @$('.stressor_perc_adj').click (event) =>
       @renderSort('stressor_perc_adj', tableName, pdata, event, "PERC_MOD", tbodyName, true, stressorFunction)
