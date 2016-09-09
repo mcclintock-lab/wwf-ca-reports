@@ -4,9 +4,9 @@
     <table>
       <thead>
         <tr>
-          <th></th>
+          <th style="text-align:center;"></th>
           <th>Mean</th>
-          <th>Standard Deviation</th>
+          <th>Total</th>
           <th>Minimum</th>
           <th>Maximum</th>
         </tr>
@@ -16,7 +16,7 @@
         <tr>
           <td>{{VERSION}}</td>
           <td>{{MEAN}}</td>
-          <td>{{STDEV}}</td>
+          <td>{{TOTAL}}</td>
           <td>{{MIN}}</td>
           <td>{{MAX}}</td>
         </tr>
@@ -31,7 +31,7 @@
       <thead>
         <tr>
           <th>Mean</th>
-          <th>Standard Deviation</th>
+          <th>Total</th>
           <th>Minimum</th>
           <th>Maximum</th>
         </tr>
@@ -39,8 +39,8 @@
       <tbody>
         {{#totals}}
         <tr>
-          <td>{{MEAN}}</td>
-          <td>{{STDEV}}</td>
+          <td style="text-align:center;">{{MEAN}}</td>
+          <td>{{TOTAL}}</td>
           <td>{{MIN}}</td>
           <td>{{MAX}}</td>
         </tr>
@@ -49,16 +49,16 @@
     </table>
     <tfoot>
       <tr colspan="4">
-        <td><div style="width:100%;text-align:center;margin-top:5px;"><i>Note: no stressors were changed from the default values</i></div></td>
+        <td><div style="width:100%;text-align:center;margin-top:5px;"><i>Note: no activities were changed from the default values</i></div></td>
       </tr> 
     </tfoot>
   </div>
 {{/hasModified}}
 
 <div class="reportSection tableContainer">
-  <h4>Cumulative Effects For Each Stressor</h4>
+  <h4>Cumulative Effects For Each Activity</h4>
     <p>
-      <span>Show Stressor Scores for Habitats:</span>
+      <span>Show Scores for Habitats:</span>
       <span><select class="chosen-habs">
         {{#habitatsForStressors}}
           <option {{sel}} value="{{VAL}}">{{DISPLAY}}</option>
@@ -79,10 +79,10 @@
         </thead>
         <tbody class="stressor_values"></tbody>
       </table>
-      <div class='no-stressor-results'>There are no stressors with cumulative impacts &gt; 0</div>
+      <div class='no-stressor-results'>There are no activities with cumulative impacts &gt; 0</div>
       <div class="show-nonzero-checkbox">
       <input class="show_nonzero" checked type="checkbox" name="show_nonzero" value="show_nonzero">
-        <span>Only show stressors with cumulative impacts &gt; 0</span>
+        <span>Only show activities with cumulative impacts &gt; 0</span>
       </div>
   {{/d3IsPresent}}
 

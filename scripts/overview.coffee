@@ -22,7 +22,7 @@ class OverviewTab extends ReportTab
     hasModified = false
 
     stressors_per_habitat = @recordSet('CumulativeImpactsPerHabitat', 'CumulativeImpact').toArray()
-
+    
     habitatsForStressors = [{VAL:"all", DISPLAY:"All Habitats", sel:'selected'}, {VAL:"bh", DISPLAY:"Benthic Habitats", sel:''},
                             {VAL:"dp", DISPLAY:"Deep Pelagic", sel:''},{VAL:"eg", DISPLAY:"Eelgrass",sel:''},
                             {VAL:"kp", DISPLAY:"Kelp", sel:''}, {VAL:"sp", DISPLAY:"Shallow Pelagic",sel:''},
@@ -32,7 +32,7 @@ class OverviewTab extends ReportTab
     stressors = _.filter stressors_per_habitat, (r) -> r.SC_ID == 'all'
     ci_totals = {NAME:"Total", PERC_TOT:100.0, PERC_MOD:'--',CUM_IMPACT:0.0}
 
-    for s in stressors
+    for s in stressors_per_habitat
       s.CUM_IMPACT = Number(s.CUM_IMPACT).toFixed(2)
       try
         if !isNaN(s.CUM_IMPACT)
@@ -84,58 +84,57 @@ class OverviewTab extends ReportTab
     @$('.show_nonzero').change () =>
       _.defer @doShowNonzeroClick(stressors_per_habitat)
     
-    @setupStressorSorting(stressors)
+    @setupStressorSorting(stressors_per_habitat)
     #@enableTablePaging()
 
   renderStressorsPerHabitat: (stressors_per_habitat) => 
-    #habitats = ['all', 'bh', 'dp', 'eg', 'kp', 'sp', 'sr']
-    name = @$('.chosen-habs').val()
-    stressors = _.filter stressors_per_habitat, (r) -> r.SC_ID == name
 
     tbodyName = '.stressor_values'
     tableName = '.stressor_table'
     stressorFunction = ["NAME", "PERC_MOD", "PERC_TOT"]
-    @renderSort('NAME', tableName, stressors, undefined, "NAME", tbodyName, false, stressorFunction, true)
+    @renderSort('NAME', tableName, undefined, "NAME", tbodyName, false, stressorFunction, true, stressors_per_habitat)
 
   doShowNonzeroClick: (stressors_per_habitat) =>
-    name = @$('.chosen-habs').val()
-    stressors = _.filter stressors_per_habitat, (r) -> r.SC_ID == name
 
     tbodyName = '.stressor_values'
     tableName = '.stressor_table'
     stressorFunction = ["NAME","PERC_MOD", "PERC_TOT"]
-    @renderSort('NAME', tableName, stressors, undefined, "NAME", tbodyName, false, stressorFunction, true)
+    @renderSort('NAME', tableName, undefined, "NAME", tbodyName, false, stressorFunction, true, stressors_per_habitat)
 
-  setupStressorSorting: (pdata) =>
+  setupStressorSorting: (all_stressors_per_habitat) =>
     tbodyName = '.stressor_values'
     tableName = '.stressor_table'
     stressorFunction = ["NAME", "PERC_MOD", "PERC_TOT"]
     
     @$('.stressor_name').click (event) =>
-      @renderSort('stressor_name', tableName, pdata, event, "NAME", tbodyName, false, stressorFunction)
-
-    #@$('.stressor_imp').click (event) =>
-    #  @renderSort('stressor_score',tableName, pdata, event, "CUM_IMPACT", tbodyName, true, stressorFunction)
+      @renderSort('stressor_name', tableName, event, "NAME", tbodyName, false, stressorFunction, false, all_stressors_per_habitat)
 
     @$('.stressor_perc_adj').click (event) =>
-      @renderSort('stressor_perc_adj', tableName, pdata, event, "PERC_MOD", tbodyName, true, stressorFunction)
+      @renderSort('stressor_perc_adj', tableName, event, "PERC_MOD", tbodyName, true, stressorFunction, false, all_stressors_per_habitat)
 
     @$('.stressor_perc_tot').click (event) =>
-      @renderSort('stressor_perc_tot', tableName, pdata, event, "PERC_TOT", tbodyName, true, stressorFunction)
+      @renderSort('stressor_perc_tot', tableName,  event, "PERC_TOT", tbodyName, true, stressorFunction, false, all_stressors_per_habitat)
 
-    @renderSort('PERC_MOD', tableName, pdata, undefined, "PERC_MOD", tbodyName, true, stressorFunction)
+    @renderSort('PERC_MOD', tableName, undefined, "PERC_MOD", tbodyName, true, stressorFunction, false, all_stressors_per_habitat)
     
   #do the sorting - should be table independent
-  renderSort: (name, tableName, pdata, event, sortBy, tbodyName, isFloat, getRowStringValue, reallySortUp) =>
+  renderSort: (name, tableName, event, sortBy, tbodyName, isFloat, getRowStringValue, reallySortUp, all_stressors_per_habitat) =>
     if event
       event.preventDefault()
 
     targetColumn = @getSelectedColumn(event, name)
 
     sortUp = @getSortDir(targetColumn)
-    
-    data = _.sortBy pdata, (row) -> row['NAME']
+
+    #get the current set from the dropdown 
+    name = @$('.chosen-habs').val()
+
+    stressors = _.filter all_stressors_per_habitat, (r) -> r.SC_ID == name
+
+
+    data = _.sortBy stressors, (row) -> row.NAME
     show_nonzero = @$('.show_nonzero')[0].checked
+
     if show_nonzero
       data = _.filter data, (row) -> row.PERC_TOT > 0.0
       #flip sorting if needed
@@ -184,6 +183,7 @@ class OverviewTab extends ReportTab
       @$('.no-stressor-results').show()
 
     @setNewSortDir(targetColumn, sortUp)
+
     @setSortingColor(event, tableName)
     
     #fire the event for the active page if pagination is present
